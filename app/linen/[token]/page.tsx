@@ -164,7 +164,7 @@ export default function PublicLinenPage() {
           </div>
         )}
 
-        <div style={{ textAlign: 'center', color: '#1e293b', fontSize: 11, marginTop: 32 }}>
+        <div style={{ textAlign: 'center', color: '#334155', fontSize: 11, marginTop: 32 }}>
           Managed by LCA Cleaning Services · Hamilton, NZ
         </div>
       </div>

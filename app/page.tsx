@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Plus, X, ChevronDown, ChevronUp, ArrowRight, ChevronLeft,
   Check, AlertTriangle, FileText, Copy, Link2, RefreshCw,
-  Droplets, Trash2, Building2, Users, Pencil
+  Droplets, Trash2, Building2, Users
 } from 'lucide-react'
 import { STAGES, STAGE_ORDER, ITEM_TYPES, SIZES, stageMeta, stageNext, stagePrev, timeAgo } from '@/lib/utils'
 
