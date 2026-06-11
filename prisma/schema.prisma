@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model LinenClient {
+  id         String      @id @default(cuid())
+  name       String
+  token      String      @unique
+  createdAt  DateTime    @default(now())
+  properties Property[]
+  items      LinenItem[]
+}
+
+model Property {
+  id            String       @id @default(cuid())
+  name          String
+  linenClientId String?
+  createdAt     DateTime     @default(now())
+  client        LinenClient? @relation(fields: [linenClientId], references: [id])
+  items         LinenItem[]
+}
+
+model LinenItem {
+  id            String      @id @default(cuid())
+  propertyId    String
+  linenClientId String
+  type          String
+  size          String
+  stage         String      @default("washing")
+  since         DateTime    @default(now())
+  due           DateTime?
+  note          String?
+  damaged       Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  property      Property    @relation(fields: [propertyId], references: [id])
+  client        LinenClient @relation(fields: [linenClientId], references: [id])
+}
