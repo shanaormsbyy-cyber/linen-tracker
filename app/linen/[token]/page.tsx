@@ -113,12 +113,7 @@ export default function PublicLinenPage() {
       <div style={{ background: 'linear-gradient(180deg, rgba(58,181,217,0.07) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '32px 20px 28px' }}>
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#3AB5D9', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>LCA Cleaning Services</div>
-                <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>Linen Status</div>
-              </div>
-            </div>
+            <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>Linen Status</div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', marginBottom: 4 }}>
                 <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#34d399', display: 'inline-block', animation: 'pulse 2.5s ease-in-out infinite' }} />
