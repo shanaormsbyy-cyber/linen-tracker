@@ -305,10 +305,11 @@ export default function DashboardPage() {
 // ── Modal sub-components ──────────────────────────────────────────────────────
 
 const fieldStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+  background: '#1e2130', border: '1px solid rgba(255,255,255,0.1)',
   color: 'white', borderRadius: 8, padding: '9px 11px', width: '100%',
   fontSize: 13, fontFamily: 'system-ui', boxSizing: 'border-box',
 }
+const optionStyle: React.CSSProperties = { background: '#1e2130', color: 'white' }
 const labelStyle: React.CSSProperties = {
   fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 5, display: 'block',
 }
@@ -375,7 +376,7 @@ function AddItemModal({ properties, onClose, onAdd }: { properties: any[]; onClo
             {properties.length === 0
               ? <p style={{ color: '#f87171', fontSize: 12, margin: 0 }}>No properties assigned to a client. Assign properties first.</p>
               : <select value={propertyId} onChange={e => setPropertyId(e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
-                  {properties.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  {properties.map((p: any) => <option key={p.id} value={p.id} style={optionStyle}>{p.name}</option>)}
                 </select>
             }
           </div>
@@ -383,13 +384,13 @@ function AddItemModal({ properties, onClose, onAdd }: { properties: any[]; onClo
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Item</label>
               <select value={type} onChange={e => setType(e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
-                {ITEM_TYPES.map(t => <option key={t}>{t}</option>)}
+                {ITEM_TYPES.map(t => <option key={t} style={optionStyle}>{t}</option>)}
               </select>
             </div>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Size</label>
               <select value={size} onChange={e => setSize(e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
-                {SIZES.map(s => <option key={s}>{s}</option>)}
+                {SIZES.map(s => <option key={s} style={optionStyle}>{s}</option>)}
               </select>
             </div>
           </div>
