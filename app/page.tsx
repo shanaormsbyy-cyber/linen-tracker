@@ -369,6 +369,7 @@ function AddItemModal({ properties, itemTypes, sizes, onClose, onAdd }: {
   const [propertyId, setPropertyId] = useState(properties[0]?.id || '')
   const [type, setType] = useState<string>(itemTypes[0] ?? '')
   const [size, setSize] = useState<string>(sizes[2] ?? sizes[0] ?? '')
+  const [qty, setQty] = useState(1)
   const [due, setDue] = useState('')
   const [note, setNote] = useState('')
   const [damaged, setDamaged] = useState(false)
@@ -378,11 +379,14 @@ function AddItemModal({ properties, itemTypes, sizes, onClose, onAdd }: {
     if (!propertyId) return
     setLoading(true)
     try {
-      await fetch('/api/items', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ propertyId, type, size, due: (due && due !== 'na') ? due : null, note, damaged }),
-      }).then(r => { if (!r.ok) throw new Error('Failed') })
+      const count = Math.max(1, Math.min(qty, 50))
+      await Promise.all(Array.from({ length: count }, () =>
+        fetch('/api/items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ propertyId, type, size, due: (due && due !== 'na') ? due : null, note, damaged }),
+        }).then(r => { if (!r.ok) throw new Error('Failed') })
+      ))
       onAdd()
     } catch (err: any) {
       alert('Failed to add item: ' + err.message)
@@ -406,17 +410,31 @@ function AddItemModal({ properties, itemTypes, sizes, onClose, onAdd }: {
             }
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 2 }}>
               <label style={labelStyle}>Item</label>
               <select value={type} onChange={e => setType(e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
                 {itemTypes.map(t => <option key={t} style={optionStyle}>{t}</option>)}
               </select>
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 2 }}>
               <label style={labelStyle}>Size</label>
               <select value={size} onChange={e => setSize(e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
                 {sizes.map(s => <option key={s} style={optionStyle}>{s}</option>)}
               </select>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Qty</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <button onClick={() => setQty(q => Math.max(1, q - 1))}
+                  style={{ ...fieldStyle, width: 30, padding: '9px 0', textAlign: 'center', cursor: 'pointer', flexShrink: 0, fontSize: 16, lineHeight: 1 }}>−</button>
+                <input
+                  type="number" min={1} max={50} value={qty}
+                  onChange={e => setQty(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+                  style={{ ...fieldStyle, textAlign: 'center', padding: '9px 4px', minWidth: 0 }}
+                />
+                <button onClick={() => setQty(q => Math.min(50, q + 1))}
+                  style={{ ...fieldStyle, width: 30, padding: '9px 0', textAlign: 'center', cursor: 'pointer', flexShrink: 0, fontSize: 16, lineHeight: 1 }}>+</button>
+              </div>
             </div>
           </div>
           <div>
@@ -444,7 +462,7 @@ function AddItemModal({ properties, itemTypes, sizes, onClose, onAdd }: {
             <span style={{ fontSize: 13, fontWeight: 600, color: damaged ? '#f87171' : '#94a3b8' }}>Flag as damaged</span>
           </button>
         </div>
-        <SubmitButton onClick={submit} disabled={loading || !propertyId} label={loading ? 'Adding...' : 'Add to Tracker'} />
+        <SubmitButton onClick={submit} disabled={loading || !propertyId} label={loading ? 'Adding...' : qty > 1 ? `Add ${qty} to Tracker` : 'Add to Tracker'} />
       </div>
     </div>
   )
