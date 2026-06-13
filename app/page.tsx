@@ -4,9 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Plus, X, ChevronDown, ChevronUp, ArrowRight, ChevronLeft,
   Check, AlertTriangle, FileText, Copy, Link2, RefreshCw,
-  Droplets, Trash2, Building2, Users
+  Droplets, Trash2, Building2, Users, Settings
 } from 'lucide-react'
-import { STAGES, STAGE_ORDER, ITEM_TYPES, SIZES, stageMeta, stageNext, stagePrev, timeAgo } from '@/lib/utils'
+import { STAGES, STAGE_ORDER, stageMeta, stageNext, stagePrev, timeAgo } from '@/lib/utils'
 
 // ── API helpers ──────────────────────────────────────────────────────────────
 
@@ -32,6 +32,7 @@ export default function DashboardPage() {
   const [addingClient, setAddingClient] = useState(false)
   const [addingProperty, setAddingProperty] = useState(false)
   const [managingProps, setManagingProps] = useState<any>(null)
+  const [showSettings, setShowSettings] = useState(false)
   const [copied, setCopied] = useState<string | null>(null)
 
   const { data: clients = [] } = useQuery<any[]>({
@@ -46,6 +47,13 @@ export default function DashboardPage() {
     queryKey: ['properties'],
     queryFn: () => apiFetch('/properties'),
   })
+  const { data: settings } = useQuery<{ itemTypes: string[]; sizes: string[] }>({
+    queryKey: ['settings'],
+    queryFn: () => apiFetch('/settings'),
+  })
+
+  const itemTypes = settings?.itemTypes ?? ['Protector', 'Inner', 'Cushion', 'Throw', 'Pillow Protector']
+  const sizes = settings?.sizes ?? ['Single', 'Double', 'King', 'Super King']
 
   const advanceItem = useMutation({
     mutationFn: ({ id, stage }: { id: string; stage: string }) =>
@@ -124,6 +132,10 @@ export default function DashboardPage() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button onClick={() => setShowSettings(true)}
+              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#94a3b8', borderRadius: 8, padding: '8px 11px', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Settings size={14} />
+            </button>
             <button onClick={() => setAddingProperty(true)}
               style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', borderRadius: 8, padding: '8px 13px', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
               <Building2 size={14} /> Add Property
@@ -274,6 +286,8 @@ export default function DashboardPage() {
       {addingItem && (
         <AddItemModal
           properties={properties.filter((p: any) => p.linenClientId)}
+          itemTypes={itemTypes}
+          sizes={sizes}
           onClose={() => setAddingItem(false)}
           onAdd={() => { qc.invalidateQueries({ queryKey: ['items'] }); setAddingItem(false) }}
         />
@@ -298,6 +312,14 @@ export default function DashboardPage() {
           onSave={() => { qc.invalidateQueries({ queryKey: ['properties'] }); setManagingProps(null) }}
         />
       )}
+      {showSettings && (
+        <SettingsModal
+          initialItemTypes={itemTypes}
+          initialSizes={sizes}
+          onClose={() => setShowSettings(false)}
+          onSave={() => { qc.invalidateQueries({ queryKey: ['settings'] }); setShowSettings(false) }}
+        />
+      )}
     </div>
   )
 }
@@ -308,6 +330,7 @@ const fieldStyle: React.CSSProperties = {
   background: '#1e2130', border: '1px solid rgba(255,255,255,0.1)',
   color: 'white', borderRadius: 8, padding: '9px 11px', width: '100%',
   fontSize: 13, fontFamily: 'system-ui', boxSizing: 'border-box',
+  colorScheme: 'dark',
 }
 const optionStyle: React.CSSProperties = { background: '#1e2130', color: 'white' }
 const labelStyle: React.CSSProperties = {
@@ -340,10 +363,12 @@ function SubmitButton({ onClick, disabled, label }: { onClick: () => void; disab
   )
 }
 
-function AddItemModal({ properties, onClose, onAdd }: { properties: any[]; onClose: () => void; onAdd: () => void }) {
+function AddItemModal({ properties, itemTypes, sizes, onClose, onAdd }: {
+  properties: any[]; itemTypes: string[]; sizes: string[]; onClose: () => void; onAdd: () => void
+}) {
   const [propertyId, setPropertyId] = useState(properties[0]?.id || '')
-  const [type, setType] = useState<string>(ITEM_TYPES[0])
-  const [size, setSize] = useState<string>(SIZES[2])
+  const [type, setType] = useState<string>(itemTypes[0] ?? '')
+  const [size, setSize] = useState<string>(sizes[2] ?? sizes[0] ?? '')
   const [due, setDue] = useState('')
   const [note, setNote] = useState('')
   const [damaged, setDamaged] = useState(false)
@@ -384,13 +409,13 @@ function AddItemModal({ properties, onClose, onAdd }: { properties: any[]; onClo
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Item</label>
               <select value={type} onChange={e => setType(e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
-                {ITEM_TYPES.map(t => <option key={t} style={optionStyle}>{t}</option>)}
+                {itemTypes.map(t => <option key={t} style={optionStyle}>{t}</option>)}
               </select>
             </div>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Size</label>
               <select value={size} onChange={e => setSize(e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
-                {SIZES.map(s => <option key={s} style={optionStyle}>{s}</option>)}
+                {sizes.map(s => <option key={s} style={optionStyle}>{s}</option>)}
               </select>
             </div>
           </div>
@@ -533,6 +558,108 @@ function ManagePropertiesModal({ client, properties, onClose, onSave }: { client
           })}
         </div>
         <SubmitButton onClick={save} disabled={loading} label={loading ? 'Saving...' : 'Save'} />
+      </div>
+    </div>
+  )
+}
+
+function TagList({ items, onRemove }: { items: string[]; onRemove: (v: string) => void }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+      {items.map(v => (
+        <span key={v} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(58,181,217,0.12)', border: '1px solid rgba(58,181,217,0.25)', color: '#3AB5D9', borderRadius: 6, padding: '4px 9px', fontSize: 12, fontWeight: 600 }}>
+          {v}
+          <button onClick={() => onRemove(v)} style={{ background: 'transparent', border: 'none', color: '#3AB5D9', cursor: 'pointer', padding: 0, lineHeight: 1, display: 'flex' }}>
+            <X size={11} />
+          </button>
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function SettingsModal({ initialItemTypes, initialSizes, onClose, onSave }: {
+  initialItemTypes: string[]; initialSizes: string[]; onClose: () => void; onSave: () => void
+}) {
+  const [itemTypes, setItemTypes] = useState<string[]>(initialItemTypes)
+  const [sizes, setSizes] = useState<string[]>(initialSizes)
+  const [newType, setNewType] = useState('')
+  const [newSize, setNewSize] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const addType = () => {
+    const v = newType.trim()
+    if (v && !itemTypes.includes(v)) setItemTypes(t => [...t, v])
+    setNewType('')
+  }
+  const addSize = () => {
+    const v = newSize.trim()
+    if (v && !sizes.includes(v)) setSizes(s => [...s, v])
+    setNewSize('')
+  }
+
+  const save = async () => {
+    setLoading(true)
+    try {
+      await fetch('/api/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemTypes, sizes }),
+      }).then(r => { if (!r.ok) throw new Error('Failed') })
+      onSave()
+    } catch (err: any) {
+      alert('Failed to save settings: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div onClick={onClose} style={modalWrap}>
+      <div onClick={e => e.stopPropagation()} style={{ ...modalBox, maxWidth: 420, maxHeight: '85vh', overflowY: 'auto' }}>
+        <ModalHeader title="Settings" onClose={onClose} />
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Item types */}
+          <div>
+            <label style={labelStyle}>Item Types</label>
+            <TagList items={itemTypes} onRemove={v => setItemTypes(t => t.filter(x => x !== v))} />
+            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+              <input
+                value={newType}
+                onChange={e => setNewType(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addType()}
+                placeholder="e.g. Duvet"
+                style={{ ...fieldStyle, flex: 1 }}
+              />
+              <button onClick={addType} disabled={!newType.trim()}
+                style={{ background: '#3AB5D9', border: 'none', color: '#000', borderRadius: 8, padding: '0 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: !newType.trim() ? 0.5 : 1, whiteSpace: 'nowrap' }}>
+                Add
+              </button>
+            </div>
+          </div>
+
+          {/* Sizes */}
+          <div>
+            <label style={labelStyle}>Sizes</label>
+            <TagList items={sizes} onRemove={v => setSizes(s => s.filter(x => x !== v))} />
+            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+              <input
+                value={newSize}
+                onChange={e => setNewSize(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addSize()}
+                placeholder="e.g. Queen"
+                style={{ ...fieldStyle, flex: 1 }}
+              />
+              <button onClick={addSize} disabled={!newSize.trim()}
+                style={{ background: '#3AB5D9', border: 'none', color: '#000', borderRadius: 8, padding: '0 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: !newSize.trim() ? 0.5 : 1, whiteSpace: 'nowrap' }}>
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <SubmitButton onClick={save} disabled={loading} label={loading ? 'Saving...' : 'Save Settings'} />
       </div>
     </div>
   )

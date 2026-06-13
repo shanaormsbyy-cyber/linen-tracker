@@ -40,3 +40,10 @@ model LinenItem {
   property      Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   client        LinenClient @relation(fields: [linenClientId], references: [id], onDelete: Cascade)
 }
+
+model Settings {
+  id         Int      @id @default(1)
+  itemTypes  String   @default("Protector,Inner")
+  sizes      String   @default("Single,Double,King,Super King")
+  updatedAt  DateTime @updatedAt
+}
