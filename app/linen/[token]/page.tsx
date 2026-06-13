@@ -23,6 +23,7 @@ interface LinenProperty {
 
 interface PublicData {
   clientName: string
+  returnedTotal: number
   properties: LinenProperty[]
 }
 
@@ -81,7 +82,7 @@ export default function PublicLinenPage() {
   const counts = {
     washing: allItems.filter(i => i.stage === 'washing').length,
     ready: allItems.filter(i => i.stage === 'ready').length,
-    returned: allItems.filter(i => i.stage === 'returned').length,
+    returned: data.returnedTotal,
   }
   const totalOut = counts.washing + counts.ready
   const damagedCount = allItems.filter(i => i.damaged && i.stage !== 'returned').length

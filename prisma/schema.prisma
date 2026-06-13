@@ -42,8 +42,9 @@ model LinenItem {
 }
 
 model Settings {
-  id         Int      @id @default(1)
-  itemTypes  String   @default("Protector,Inner")
-  sizes      String   @default("Single,Double,King,Super King")
-  updatedAt  DateTime @updatedAt
+  id             Int      @id @default(1)
+  itemTypes      String   @default("Protector,Inner")
+  sizes          String   @default("Single,Double,King,Super King")
+  returnedTotal  Int      @default(0)
+  updatedAt      DateTime @updatedAt
 }

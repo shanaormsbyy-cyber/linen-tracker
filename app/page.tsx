@@ -47,13 +47,14 @@ export default function DashboardPage() {
     queryKey: ['properties'],
     queryFn: () => apiFetch('/properties'),
   })
-  const { data: settings } = useQuery<{ itemTypes: string[]; sizes: string[] }>({
+  const { data: settings } = useQuery<{ itemTypes: string[]; sizes: string[]; returnedTotal: number }>({
     queryKey: ['settings'],
     queryFn: () => apiFetch('/settings'),
   })
 
   const itemTypes = settings?.itemTypes ?? ['Protector', 'Inner', 'Cushion', 'Throw', 'Pillow Protector']
   const sizes = settings?.sizes ?? ['Single', 'Double', 'King', 'Super King']
+  const returnedTotal = settings?.returnedTotal ?? 0
 
   const advanceItem = useMutation({
     mutationFn: ({ id, stage }: { id: string; stage: string }) =>
@@ -316,6 +317,7 @@ export default function DashboardPage() {
         <SettingsModal
           initialItemTypes={itemTypes}
           initialSizes={sizes}
+          initialReturnedTotal={returnedTotal}
           onClose={() => setShowSettings(false)}
           onSave={() => { qc.invalidateQueries({ queryKey: ['settings'] }); setShowSettings(false) }}
         />
@@ -605,11 +607,12 @@ function TagList({ items, onRemove }: { items: string[]; onRemove: (v: string) =
   )
 }
 
-function SettingsModal({ initialItemTypes, initialSizes, onClose, onSave }: {
-  initialItemTypes: string[]; initialSizes: string[]; onClose: () => void; onSave: () => void
+function SettingsModal({ initialItemTypes, initialSizes, initialReturnedTotal, onClose, onSave }: {
+  initialItemTypes: string[]; initialSizes: string[]; initialReturnedTotal: number; onClose: () => void; onSave: () => void
 }) {
   const [itemTypes, setItemTypes] = useState<string[]>(initialItemTypes)
   const [sizes, setSizes] = useState<string[]>(initialSizes)
+  const [returnedTotal, setReturnedTotal] = useState<number>(initialReturnedTotal)
   const [newType, setNewType] = useState('')
   const [newSize, setNewSize] = useState('')
   const [loading, setLoading] = useState(false)
@@ -631,7 +634,7 @@ function SettingsModal({ initialItemTypes, initialSizes, onClose, onSave }: {
       await fetch('/api/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itemTypes, sizes }),
+        body: JSON.stringify({ itemTypes, sizes, returnedTotal }),
       }).then(r => { if (!r.ok) throw new Error('Failed') })
       onSave()
     } catch (err: any) {
@@ -682,6 +685,25 @@ function SettingsModal({ initialItemTypes, initialSizes, onClose, onSave }: {
                 style={{ background: '#3AB5D9', border: 'none', color: '#000', borderRadius: 8, padding: '0 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: !newSize.trim() ? 0.5 : 1, whiteSpace: 'nowrap' }}>
                 Add
               </button>
+            </div>
+          </div>
+
+          {/* Returned total */}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 18 }}>
+            <label style={labelStyle}>Returned Total <span style={{ color: '#334155', fontWeight: 400, textTransform: 'none' }}>(shown to clients)</span></label>
+            <p style={{ margin: '0 0 10px', fontSize: 11, color: '#475569', lineHeight: 1.5 }}>
+              This number shows on the client-facing page as total items returned. Set it manually to reflect your historical count.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button onClick={() => setReturnedTotal(n => Math.max(0, n - 1))}
+                style={{ background: '#1e2130', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: 8, width: 34, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 18, fontFamily: 'system-ui', flexShrink: 0 }}>−</button>
+              <input
+                type="number" min={0} value={returnedTotal}
+                onChange={e => setReturnedTotal(Math.max(0, parseInt(e.target.value) || 0))}
+                style={{ ...fieldStyle, textAlign: 'center', padding: '9px 4px' }}
+              />
+              <button onClick={() => setReturnedTotal(n => n + 1)}
+                style={{ background: '#1e2130', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: 8, width: 34, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 18, fontFamily: 'system-ui', flexShrink: 0 }}>+</button>
             </div>
           </div>
         </div>

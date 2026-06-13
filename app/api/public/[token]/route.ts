@@ -16,8 +16,12 @@ export async function GET(_req: Request, { params }: { params: { token: string }
 
   if (!client) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+  const settings = await prisma.settings.findUnique({ where: { id: 1 } })
+  const returnedTotal = settings?.returnedTotal ?? 0
+
   return NextResponse.json({
     clientName: client.name,
+    returnedTotal,
     properties: client.properties.map(p => ({
       id: p.id,
       name: p.name,
