@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { ChevronDown, ChevronUp, AlertTriangle, Droplets, CheckCircle2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { stageMeta, STAGES } from '@/lib/utils'
 
 interface LinenItem {
@@ -114,9 +114,6 @@ export default function PublicLinenPage() {
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 13, background: 'linear-gradient(135deg, #3AB5D9, #1e8fad)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(58,181,217,0.3)' }}>
-                <Droplets size={22} color="#fff" />
-              </div>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 600, color: '#3AB5D9', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>LCA Cleaning Services</div>
                 <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>Linen Status</div>
@@ -293,12 +290,6 @@ export default function PublicLinenPage() {
           </div>
         )}
 
-        <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <div style={{ width: 20, height: 20, borderRadius: 6, background: '#3AB5D9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Droplets size={11} color="#000" />
-          </div>
-          <span style={{ fontSize: 11, color: '#1e293b', fontWeight: 500 }}>LCA Cleaning Services · Hamilton, NZ</span>
-        </div>
       </div>
     </div>
   )
