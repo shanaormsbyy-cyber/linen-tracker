@@ -32,6 +32,7 @@ export default function PublicLinenPage() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
+  const [view, setView] = useState<'property' | 'stage'>('property')
 
   const fetchData = () => {
     fetch(`/api/public/${token}`)
@@ -93,7 +94,7 @@ export default function PublicLinenPage() {
   })
 
   const stageConfig = {
-    washing: { label: 'At Laundry', color: '#3AB5D9', bg: 'rgba(58,181,217,0.08)', border: 'rgba(58,181,217,0.2)', glow: 'rgba(58,181,217,0.15)' },
+    washing: { label: 'Washing', color: '#3AB5D9', bg: 'rgba(58,181,217,0.08)', border: 'rgba(58,181,217,0.2)', glow: 'rgba(58,181,217,0.15)' },
     ready:   { label: 'Ready',      color: '#34d399', bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.2)', glow: 'rgba(52,211,153,0.15)' },
     returned:{ label: 'Returned',   color: '#64748b', bg: 'rgba(100,116,139,0.08)', border: 'rgba(100,116,139,0.15)', glow: 'transparent' },
   } as const
@@ -150,6 +151,16 @@ export default function PublicLinenPage() {
       {/* Properties */}
       <div style={{ maxWidth: 700, margin: '0 auto', padding: '24px 20px 64px', animation: 'fadeIn 0.4s ease' }}>
 
+        {/* View toggle */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 4, width: 'fit-content' }}>
+          {(['property', 'stage'] as const).map(v => (
+            <button key={v} onClick={() => setView(v)}
+              style={{ background: view === v ? 'rgba(58,181,217,0.15)' : 'transparent', border: view === v ? '1px solid rgba(58,181,217,0.3)' : '1px solid transparent', color: view === v ? '#3AB5D9' : '#475569', borderRadius: 7, padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}>
+              {v === 'property' ? 'By Property' : 'By Stage'}
+            </button>
+          ))}
+        </div>
+
         {totalOut === 0 && totalItems > 0 && (
           <div style={{ background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 14, padding: '18px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 14 }}>
             <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -164,7 +175,61 @@ export default function PublicLinenPage() {
 
         {sortedProperties.length === 0 ? (
           <div style={{ textAlign: 'center', color: '#334155', fontSize: 13, padding: '60px 0' }}>No properties to display.</div>
+        ) : view === 'stage' ? (
+          /* ── By Stage view ── */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {(['washing', 'ready'] as const).map(stageKey => {
+              const cfg = stageConfig[stageKey]
+              const stageItems = allItems.filter(i => i.stage === stageKey)
+              if (stageItems.length === 0) return null
+
+              // Group by property
+              const byProp: Record<string, { name: string; items: LinenItem[] }> = {}
+              data.properties.forEach(p => { byProp[p.id] = { name: p.name, items: [] } })
+              stageItems.forEach(item => {
+                const prop = data.properties.find(p => p.items.some(i => i.id === item.id))
+                if (prop && byProp[prop.id]) byProp[prop.id].items.push(item)
+              })
+              const propsWithItems = Object.values(byProp).filter(p => p.items.length > 0)
+
+              return (
+                <div key={stageKey} style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, borderRadius: 16, overflow: 'hidden' }}>
+                  <div style={{ padding: '16px 18px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: cfg.color, flexShrink: 0, boxShadow: `0 0 8px ${cfg.color}` }} />
+                    <span style={{ fontSize: 13, fontWeight: 800, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{cfg.label}</span>
+                    <span style={{ fontSize: 12, color: cfg.color, opacity: 0.6, fontWeight: 600 }}>{stageItems.length} item{stageItems.length !== 1 ? 's' : ''}</span>
+                  </div>
+                  <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {propsWithItems.map(prop => (
+                      <div key={prop.name} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 10, padding: '10px 13px' }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{prop.name}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {prop.items.map(item => (
+                            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 8, padding: '8px 11px' }}>
+                              <span style={{ flex: 1, fontSize: 13, color: '#cbd5e1', fontWeight: 500 }}>
+                                {item.size !== 'N/A' ? `${item.size} ` : ''}{item.type}
+                              </span>
+                              {item.note && <span style={{ fontSize: 11, color: '#475569', fontStyle: 'italic', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.note}</span>}
+                              {item.damaged && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(248,113,113,0.1)', color: '#f87171', border: '1px solid rgba(248,113,113,0.2)', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, flexShrink: 0 }}>
+                                  <AlertTriangle size={9} /> Damaged
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+            {counts.washing === 0 && counts.ready === 0 && (
+              <div style={{ textAlign: 'center', color: '#334155', fontSize: 13, padding: '40px 0' }}>Nothing currently out.</div>
+            )}
+          </div>
         ) : (
+          /* ── By Property view ── */
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {sortedProperties.map(prop => {
               const outItems = prop.items.filter(i => i.stage !== 'returned')
