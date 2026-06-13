@@ -381,7 +381,7 @@ function AddItemModal({ properties, itemTypes, sizes, onClose, onAdd }: {
       await fetch('/api/items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ propertyId, type, size, due: due || null, note, damaged }),
+        body: JSON.stringify({ propertyId, type, size, due: (due && due !== 'na') ? due : null, note, damaged }),
       }).then(r => { if (!r.ok) throw new Error('Failed') })
       onAdd()
     } catch (err: any) {
@@ -420,8 +420,17 @@ function AddItemModal({ properties, itemTypes, sizes, onClose, onAdd }: {
             </div>
           </div>
           <div>
-            <label style={labelStyle}>Expected back by <span style={{ color: '#334155', fontWeight: 400 }}>(optional)</span></label>
-            <input type="date" value={due} onChange={e => setDue(e.target.value)} style={fieldStyle} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Expected back by <span style={{ color: '#334155', fontWeight: 400 }}>(optional)</span></label>
+              <button onClick={() => setDue(due === 'na' ? '' : 'na')}
+                style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <span style={{ width: 15, height: 15, borderRadius: 4, border: `1.5px solid ${due === 'na' ? '#3AB5D9' : '#334155'}`, background: due === 'na' ? '#3AB5D9' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {due === 'na' && <Check size={10} color="#000" />}
+                </span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: due === 'na' ? '#3AB5D9' : '#475569' }}>N/A</span>
+              </button>
+            </div>
+            {due !== 'na' && <input type="date" value={due} onChange={e => setDue(e.target.value)} style={fieldStyle} />}
           </div>
           <div>
             <label style={labelStyle}>Notes <span style={{ color: '#334155', fontWeight: 400 }}>(optional)</span></label>
