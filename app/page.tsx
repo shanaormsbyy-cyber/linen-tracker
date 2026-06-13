@@ -426,14 +426,14 @@ function AddItemModal({ properties, itemTypes, sizes, onClose, onAdd }: {
               <label style={labelStyle}>Qty</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                  style={{ ...fieldStyle, width: 30, padding: '9px 0', textAlign: 'center', cursor: 'pointer', flexShrink: 0, fontSize: 16, lineHeight: 1 }}>−</button>
+                  style={{ background: '#1e2130', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: 8, width: 34, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, fontSize: 18, fontFamily: 'system-ui' }}>−</button>
                 <input
                   type="number" min={1} max={50} value={qty}
                   onChange={e => setQty(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
-                  style={{ ...fieldStyle, textAlign: 'center', padding: '9px 4px', minWidth: 0 }}
+                  style={{ ...fieldStyle, textAlign: 'center', padding: '9px 4px', minWidth: 0, width: '100%' }}
                 />
                 <button onClick={() => setQty(q => Math.min(50, q + 1))}
-                  style={{ ...fieldStyle, width: 30, padding: '9px 0', textAlign: 'center', cursor: 'pointer', flexShrink: 0, fontSize: 16, lineHeight: 1 }}>+</button>
+                  style={{ background: '#1e2130', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: 8, width: 34, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, fontSize: 18, fontFamily: 'system-ui' }}>+</button>
               </div>
             </div>
           </div>
