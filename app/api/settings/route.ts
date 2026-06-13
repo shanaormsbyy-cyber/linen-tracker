@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
 const DEFAULT_ITEM_TYPES = 'Protector,Inner,Cushion,Throw,Pillow Protector'
-const DEFAULT_SIZES = 'Single,Double,King,Super King'
+const DEFAULT_SIZES = 'N/A,Single,Double,King,Super King'
 
 async function getOrCreate() {
   const existing = await prisma.settings.findUnique({ where: { id: 1 } })
