@@ -98,9 +98,6 @@ export default function PublicLinenPage() {
               <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em' }}>Linen Tracker</h1>
               <span style={{ color: '#64748b', fontSize: 13 }}>— {data.clientName}</span>
             </div>
-            <div style={{ marginTop: 4 }}>
-              <span style={{ color: '#475569', fontSize: 11 }}>Updated {timeAgo(lastFetch.toISOString())}</span>
-            </div>
           </div>
           <div style={{ background: 'rgba(58,181,217,0.12)', border: '1px solid rgba(58,181,217,0.3)', color: '#3AB5D9', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 20, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3AB5D9', display: 'inline-block' }} />
@@ -152,7 +149,6 @@ export default function PublicLinenPage() {
                             )}
                             {item.note && <span title={item.note} style={{ display: 'flex', alignItems: 'center' }}><FileText size={11} color="#475569" /></span>}
                             <span style={{ background: sm.bg, color: sm.color, border: `1px solid ${sm.border}`, fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 20 }}>{sm.label}</span>
-                            <span style={{ color: '#334155', fontSize: 10 }}>{timeAgo(item.since)}</span>
                           </div>
                         )
                       })}
